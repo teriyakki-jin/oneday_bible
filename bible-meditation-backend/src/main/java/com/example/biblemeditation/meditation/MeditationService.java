@@ -1,84 +1,110 @@
 package com.example.biblemeditation.meditation;
 
-import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import java.util.*;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class MeditationService {
+    private static final Map<String, String> SUGGESTED_VERSES = Map.of(
+            "anxiety", "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. (Philippians 4:6)",
+            "hope", "Those who hope in the Lord will renew their strength. They will soar on wings like eagles. (Isaiah 40:31)",
+            "gratitude", "Give thanks to the Lord, for he is good; his love endures forever. (Psalm 107:1)",
+            "rest", "Come to me, all you who are weary and burdened, and I will give you rest. (Matthew 11:28)",
+            "guidance", "Trust in the Lord with all your heart and lean not on your own understanding. (Proverbs 3:5)"
+    );
 
-    /**
-     * MVP: reference별 샘플 데이터 제공 (AI/DB 없이도 바로 동작)
-     * - 나중에 여기만 교체해서 AI 생성/DB 저장으로 확장하면 됨
-     */
-    private final Map<String, MeditationResponse> samples;
+    private final List<MeditationResponse> history = new CopyOnWriteArrayList<>();
 
-    public MeditationService() {
-        this.samples = SampleMeditations.build();
+    public MeditationResponse createMeditation(MeditationRequest request) {
+        String normalizedTag = normalizeTag(request.getContextTag());
+        String verseText = resolveVerseText(request.getVerseText(), normalizedTag);
+
+        String reflection = buildReflection(request.getReference(), verseText, normalizedTag);
+        String prayer = buildPrayer(normalizedTag);
+
+        MeditationResponse response = new MeditationResponse(
+                request.getReference(),
+                verseText,
+                reflection,
+                prayer,
+                normalizedTag,
+                Instant.now()
+        );
+
+        addToHistory(response);
+        return response;
     }
 
-    public MeditationResponse create(MeditationRequest request) {
-        String key = normalize(request.getReference());
+    public List<MeditationResponse> recentMeditations() {
+        List<MeditationResponse> snapshot = new ArrayList<>(history);
+        Collections.reverse(snapshot);
+        return snapshot;
+    }
 
-        // 샘플 우선 제공
-        MeditationResponse sample = samples.get(key);
-        if (sample != null) {
-            // verseText가 요청에 들어오면 덮어쓰기(옵션)
-            if (request.getVerseText() != null && !request.getVerseText().isBlank()) {
-                return MeditationResponse.builder()
-                        .reference(sample.getReference())
-                        .verseText(request.getVerseText())
-                        .summary(sample.getSummary())
-                        .easyInterpretation(sample.getEasyInterpretation())
-                        .keyPoints(sample.getKeyPoints())
-                        .questions(sample.getQuestions())
-                        .practice(sample.getPractice())
-                        .prayer(sample.getPrayer())
-                        .caution(sample.getCaution())
-                        .build();
-            }
-            return sample;
+    private void addToHistory(MeditationResponse response) {
+        history.add(response);
+        if (history.size() > 20) {
+            history.remove(0);
+        }
+    }
+
+    private String resolveVerseText(String verseText, String normalizedTag) {
+        if (StringUtils.hasText(verseText)) {
+            return verseText.trim();
         }
 
-        // 샘플이 없으면 "기본 템플릿"으로 반환 (사용감 유지)
-        return MeditationResponse.builder()
-                .reference(request.getReference())
-                .verseText(request.getVerseText())
-                .summary("이 구절을 '정보'가 아니라 '초대'로 읽어보세요.")
-                .easyInterpretation(List.of(
-                        "먼저, 문맥을 떠올려 보세요(누가 누구에게 말하는지).",
-                        "그 다음, 지금 내 삶에 연결되는 단어 하나를 고르세요.",
-                        "마지막으로, 오늘 실천할 수 있는 작은 행동을 정해보세요."
-                ))
-                .keyPoints(List.of("문맥", "핵심 단어", "작은 실천"))
-                .questions(List.of(
-                        "이 구절에서 오늘 나에게 가장 걸리는 단어는 무엇이야?",
-                        "내가 지금 놓치고 있는 관점은 없을까?",
-                        "오늘 5분 안에 할 수 있는 순종/실천은?"
-                ))
-                .practice("오늘 5분, 이 구절을 한 번 천천히 소리 내어 읽고 한 문장으로 요약해 보기")
-                .prayer("하나님, 오늘 제 마음이 말씀 앞에서 부드러워지게 해주세요.")
-                .caution("단정하기보다, 성찰과 적용으로 이어가 보세요.")
-                .build();
+        return SUGGESTED_VERSES.getOrDefault(
+                normalizedTag,
+                "Slow down for a moment. Invite the Spirit to speak through this passage and listen for God's gentle guidance."
+        );
     }
 
-    /**
-     * 아주 단순한 표준화:
-     * - 공백 제거, 대소문자 통일, 일부 약어 처리
-     */
-    private String normalize(String reference) {
-        if (reference == null) return "";
-        String r = reference.trim()
-                .replaceAll("\s+", " ")
-                .toLowerCase(Locale.ROOT);
+    private String buildReflection(String reference, String verseText, String normalizedTag) {
+        Map<String, String> prompts = new LinkedHashMap<>();
+        prompts.put("anxiety", "Imagine placing your worries into God's hands as you read this passage. What eases in your heart?");
+        prompts.put("hope", "Look for a promise in this verse. How does it reshape what you are facing today?");
+        prompts.put("gratitude", "Notice a reason to give thanks in these words. What small gift can you acknowledge right now?");
+        prompts.put("rest", "Read slowly and breathe. Where do you sense Jesus inviting you to rest?");
+        prompts.put("guidance", "As you meditate, ask the Spirit to highlight one word or phrase. What next step comes to mind?");
 
-        // 한글 약어를 영어 키로 단순 매핑 (필요하면 추가)
-        r = r.replace("요 ", "john ");
-        r = r.replace("시 ", "psalm ");
-        r = r.replace("빌 ", "philippians ");
-        r = r.replace("마 ", "matthew ");
-        r = r.replace("롬 ", "romans ");
+        String basePrompt = prompts.getOrDefault(
+                normalizedTag,
+                "Sit quietly with this verse. What does God's character look like here, and how might you respond?"
+        );
 
-        return r;
+        return """
+                Reference: %s\n
+                %s\n
+                %s""".formatted(reference, verseText, basePrompt);
+    }
+
+    private String buildPrayer(String normalizedTag) {
+        Map<String, String> prayers = new LinkedHashMap<>();
+        prayers.put("anxiety", "주님, 제 걱정을 주님께 맡깁니다. 당신의 평안으로 제 마음을 채워주세요.");
+        prayers.put("hope", "하나님, 소망을 주셔서 감사합니다. 오늘도 주님의 약속을 믿고 걷게 해주세요.");
+        prayers.put("gratitude", "아버지, 오늘 주신 은혜에 감사드립니다. 감사의 마음을 잃지 않게 해주세요.");
+        prayers.put("rest", "예수님, 지친 제 마음을 쉬게 해주세요. 주님 안에서 깊은 안식을 누리게 해주세요.");
+        prayers.put("guidance", "성령님, 제 걸음을 인도해주세요. 주님의 지혜로 다음 걸음을 분별하게 해주세요.");
+
+        return prayers.getOrDefault(
+                normalizedTag,
+                "주님, 이 말씀을 통해 제 마음을 비추어 주세요. 당신의 사랑에 응답하며 살아가게 해주세요."
+        );
+    }
+
+    private String normalizeTag(String contextTag) {
+        if (!StringUtils.hasText(contextTag)) {
+            return "general";
+        }
+        return contextTag.trim().toLowerCase(Locale.ROOT);
     }
 }
