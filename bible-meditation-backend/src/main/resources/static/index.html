@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDay Bible</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --primary: #1f5aff;
+            --primary-muted: #e6edff;
+            --text: #0f172a;
+            --muted: #6b7280;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(55% 65% at 5% 10%, rgba(43, 108, 255, 0.08), transparent),
+                radial-gradient(50% 50% at 90% 5%, rgba(59, 130, 246, 0.05), transparent),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 72px 20px 24px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 34px;
+            letter-spacing: -0.02em;
+        }
+
+        p.lead {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        main {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 20px 72px;
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 960px) {
+            main {
+                grid-template-columns: 1.05fr 0.95fr;
+                align-items: start;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 25px 80px rgba(15, 23, 42, 0.08);
+            padding: 22px;
+        }
+
+        .card h2 {
+            margin: 0 0 14px;
+            font-size: 18px;
+            letter-spacing: -0.01em;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .field { margin-bottom: 14px; }
+
+        input, textarea, select, button {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            color: var(--text);
+            padding: 12px 14px;
+            font-size: 14px;
+            transition: border-color 120ms ease, box-shadow 120ms ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #bfd2ff;
+            box-shadow: 0 0 0 3px var(--primary-muted);
+            background: #fff;
+        }
+
+        textarea { resize: vertical; min-height: 120px; }
+
+        button {
+            background: linear-gradient(135deg, #1f5aff, #2563eb);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.22);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .result-shell {
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            min-height: 260px;
+        }
+
+        .result-shell.empty { color: var(--muted); display: flex; align-items: center; justify-content: center; text-align: center; }
+
+        .result-shell h3 { margin-top: 0; margin-bottom: 10px; font-size: 15px; }
+        .result-shell p { margin: 0 0 12px; line-height: 1.6; }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-muted);
+            color: #1f3b8a;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .history {
+            grid-column: 1 / -1;
+        }
+
+        ul#history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 12px;
+        }
+
+        ul#history-list li {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            background: #f9fafb;
+        }
+
+        .timestamp {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .muted { color: var(--muted); }
+    </style>
+</head>
+<body>
+<header>
+    <h1>OneDay Bible</h1>
+    <p class="lead">Make it easy to meditate on God's Word.</p>
+</header>
+
+<main>
+    <section class="card">
+        <h2>Create Meditation</h2>
+        <form id="meditation-form" novalidate>
+            <div class="field">
+                <label for="reference">Bible Reference</label>
+                <input id="reference" name="reference" placeholder="e.g. John 3:16" required />
+                <div class="hint">Enter the verse reference you'd like to meditate on.</div>
+            </div>
+
+            <div class="field">
+                <label for="contextTag">Context</label>
+                <select id="contextTag" name="contextTag">
+                    <option value="">General</option>
+                    <option value="anxiety">Anxiety</option>
+                    <option value="hope">Hope</option>
+                    <option value="gratitude">Gratitude</option>
+                    <option value="rest">Rest</option>
+                    <option value="guidance">Guidance</option>
+                </select>
+                <div class="hint">Choose the life situation or theme for your meditation.</div>
+            </div>
+
+            <div class="field">
+                <label for="verseText">Verse Text (Optional)</label>
+                <textarea id="verseText" name="verseText" placeholder="Paste the verse text here (optional)"></textarea>
+                <div class="hint">If left empty, the service will look up the verse.</div>
+            </div>
+
+            <button type="submit" id="submit-btn" disabled>Create Meditation</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Meditation</h2>
+        <div id="result" class="result-shell empty">
+            Enter a Bible verse reference to begin your meditation.
+        </div>
+    </section>
+
+    <section class="card history">
+        <h2>Recent Meditations</h2>
+        <ul id="history-list">
+            <li class="muted">No meditations yet.</li>
+        </ul>
+    </section>
+</main>
+
+<script>
+    const form = document.getElementById('meditation-form');
+    const resultBox = document.getElementById('result');
+    const submitBtn = document.getElementById('submit-btn');
+    const historyList = document.getElementById('history-list');
+    const referenceInput = document.getElementById('reference');
+
+    function toggleSubmitState() {
+        submitBtn.disabled = !referenceInput.value.trim() || submitBtn.dataset.loading === 'true';
+    }
+
+    referenceInput.addEventListener('input', toggleSubmitState);
+
+    async function fetchRecent() {
+        try {
+            const res = await fetch('/api/meditations/recent');
+            if (!res.ok) return;
+            const data = await res.json();
+            renderHistory(data);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function renderHistory(items) {
+        historyList.innerHTML = '';
+        if (!items || items.length === 0) {
+            historyList.innerHTML = '<li class="muted">No meditations yet.</li>';
+            return;
+        }
+
+        for (const item of items) {
+            const li = document.createElement('li');
+            const time = new Date(item.createdAt).toLocaleString();
+            li.innerHTML = `
+                <div class="timestamp">${time}</div>
+                <div><strong>${item.reference}</strong> <span class="muted">${item.contextTag || 'General'}</span></div>
+                <div class="muted" style="margin-top: 6px; line-height: 1.5;">${item.prayer}</div>
+            `;
+            historyList.appendChild(li);
+        }
+    }
+
+    function renderResult(data) {
+        if (!data) {
+            resultBox.classList.add('empty');
+            resultBox.innerHTML = 'Enter a Bible verse reference to begin your meditation.';
+            return;
+        }
+
+        resultBox.classList.remove('empty');
+        resultBox.innerHTML = `
+            <div class="tag">${data.reference}${data.contextTag ? ' · ' + data.contextTag : ''}</div>
+            <h3>Reflection</h3>
+            <p>${data.reflection.replace(/\n/g, '<br>')}</p>
+            <h3>Prayer</h3>
+            <p>${data.prayer.replace(/\n/g, '<br>')}</p>
+        `;
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        submitBtn.dataset.loading = 'true';
+        toggleSubmitState();
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Creating...';
+
+        const payload = {
+            reference: form.reference.value.trim(),
+            contextTag: form.contextTag.value,
+            verseText: form.verseText.value.trim() || null
+        };
+
+        try {
+            const res = await fetch('/api/meditations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                renderResult({
+                    reference: payload.reference,
+                    contextTag: payload.contextTag,
+                    reflection: 'An error occurred while creating the meditation.',
+                    prayer: err || 'Please try again in a moment.'
+                });
+                return;
+            }
+
+            const data = await res.json();
+            renderResult(data);
+            fetchRecent();
+        } catch (e) {
+            renderResult({
+                reference: payload.reference,
+                contextTag: payload.contextTag,
+                reflection: 'We could not reach the server.',
+                prayer: 'Please check your connection and try again.'
+            });
+        } finally {
+            submitBtn.dataset.loading = 'false';
+            submitBtn.textContent = originalText;
+            toggleSubmitState();
+        }
+    });
+
+    fetchRecent();
+    toggleSubmitState();
+</script>
+</body>
+</html>
