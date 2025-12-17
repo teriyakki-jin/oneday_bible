@@ -1,219 +1,235 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘의 묵상</title>
+    <title>OneDay Bible</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #111827;
-            --accent: #c084fc;
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --border: #1f2937;
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --primary: #1f5aff;
+            --primary-muted: #e6edff;
+            --text: #0f172a;
+            --muted: #6b7280;
         }
 
         * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(192, 132, 252, 0.15), transparent 25%),
-                radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.15), transparent 20%),
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(55% 65% at 5% 10%, rgba(43, 108, 255, 0.08), transparent),
+                radial-gradient(50% 50% at 90% 5%, rgba(59, 130, 246, 0.05), transparent),
                 var(--bg);
             color: var(--text);
             min-height: 100vh;
         }
 
         header {
-            max-width: 960px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 56px 20px 24px;
+            padding: 72px 20px 24px;
+            text-align: center;
         }
 
         h1 {
             margin: 0;
-            font-size: 32px;
+            font-size: 34px;
             letter-spacing: -0.02em;
         }
 
         p.lead {
-            margin: 12px 0 0;
+            margin: 10px 0 0;
             color: var(--muted);
+            font-size: 16px;
         }
 
         main {
-            max-width: 960px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 0 20px 60px;
+            padding: 0 20px 72px;
             display: grid;
+            gap: 20px;
             grid-template-columns: 1fr;
-            gap: 16px;
         }
 
         @media (min-width: 960px) {
             main {
-                grid-template-columns: 1fr 0.9fr;
+                grid-template-columns: 1.05fr 0.95fr;
+                align-items: start;
             }
         }
 
         .card {
-            background: linear-gradient(145deg, rgba(17, 24, 39, 0.95), rgba(17, 24, 39, 0.8));
+            background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(6px);
+            border-radius: 14px;
+            box-shadow: 0 25px 80px rgba(15, 23, 42, 0.08);
+            padding: 22px;
         }
 
         .card h2 {
-            margin-top: 0;
+            margin: 0 0 14px;
             font-size: 18px;
             letter-spacing: -0.01em;
         }
 
-        .input-row {
-            display: grid;
-            gap: 12px;
-            grid-template-columns: 1fr;
-            margin-top: 12px;
-        }
-
-        @media (min-width: 640px) {
-            .input-row.two {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
         label {
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 6px;
             display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
         }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .field { margin-bottom: 14px; }
 
         input, textarea, select, button {
             width: 100%;
             border-radius: 12px;
             border: 1px solid var(--border);
-            background: #0b1224;
+            background: #f9fafb;
             color: var(--text);
             padding: 12px 14px;
             font-size: 14px;
+            transition: border-color 120ms ease, box-shadow 120ms ease;
         }
 
-        textarea { min-height: 110px; resize: vertical; }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #bfd2ff;
+            box-shadow: 0 0 0 3px var(--primary-muted);
+            background: #fff;
+        }
+
+        textarea { resize: vertical; min-height: 120px; }
 
         button {
-            background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+            background: linear-gradient(135deg, #1f5aff, #2563eb);
+            color: #fff;
             border: none;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 120ms ease, box-shadow 120ms ease;
-            color: #0b1224;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.22);
         }
 
-        button:hover { transform: translateY(-1px); }
-        button:active { transform: translateY(0); }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
-        .pill {
+        .result-shell {
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            min-height: 260px;
+        }
+
+        .result-shell.empty { color: var(--muted); display: flex; align-items: center; justify-content: center; text-align: center; }
+
+        .result-shell h3 { margin-top: 0; margin-bottom: 10px; font-size: 15px; }
+        .result-shell p { margin: 0 0 12px; line-height: 1.6; }
+
+        .tag {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(192, 132, 252, 0.1);
-            color: #d8b4fe;
-            border-radius: 999px;
+            background: var(--primary-muted);
+            color: #1f3b8a;
             padding: 6px 10px;
+            border-radius: 999px;
             font-size: 12px;
-            margin-right: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
 
-        .result {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
-            background: #0b1224;
-            white-space: pre-wrap;
-            line-height: 1.6;
+        .history {
+            grid-column: 1 / -1;
         }
 
-        .muted { color: var(--muted); }
-
-        ul.history {
+        ul#history-list {
             list-style: none;
             padding: 0;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: grid;
+            gap: 12px;
         }
 
-        ul.history li {
+        ul#history-list li {
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 12px;
-            background: #0b1224;
+            background: #f9fafb;
         }
 
-        .timestamp { color: var(--muted); font-size: 12px; }
+        .timestamp {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .muted { color: var(--muted); }
     </style>
 </head>
 <body>
 <header>
-    <div class="pill">새벽 묵상</div>
-    <h1>오늘의 말씀을 마음에 새겨요</h1>
-    <p class="lead">원하는 성경 구절과 상황을 입력하면 간단한 묵상 가이드와 기도를 만들어 드립니다.</p>
+    <h1>OneDay Bible</h1>
+    <p class="lead">Make it easy to meditate on God's Word.</p>
 </header>
 
 <main>
     <section class="card">
-        <h2>묵상 만들기</h2>
-        <form id="meditation-form">
-            <div class="input-row">
-                <div>
-                    <label for="reference">성경 구절 (예: John 3:16)</label>
-                    <input id="reference" name="reference" placeholder="John 3:16" required />
-                </div>
+        <h2>Create Meditation</h2>
+        <form id="meditation-form" novalidate>
+            <div class="field">
+                <label for="reference">Bible Reference</label>
+                <input id="reference" name="reference" placeholder="e.g. John 3:16" required />
+                <div class="hint">Enter the verse reference you'd like to meditate on.</div>
             </div>
-            <div class="input-row two">
-                <div>
-                    <label for="contextTag">상황 선택</label>
-                    <select id="contextTag" name="contextTag">
-                        <option value="">일반</option>
-                        <option value="anxiety">불안</option>
-                        <option value="hope">소망</option>
-                        <option value="gratitude">감사</option>
-                        <option value="rest">쉼</option>
-                        <option value="guidance">인도하심</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="verseText">말씀 내용 (옵션)</label>
-                    <input id="verseText" name="verseText" placeholder="본문을 붙여넣거나 비워두면 추천 구절을 드려요" />
-                </div>
+
+            <div class="field">
+                <label for="contextTag">Context</label>
+                <select id="contextTag" name="contextTag">
+                    <option value="">General</option>
+                    <option value="anxiety">Anxiety</option>
+                    <option value="hope">Hope</option>
+                    <option value="gratitude">Gratitude</option>
+                    <option value="rest">Rest</option>
+                    <option value="guidance">Guidance</option>
+                </select>
+                <div class="hint">Choose the life situation or theme for your meditation.</div>
             </div>
-            <div class="input-row">
-                <div>
-                    <label for="notes">오늘의 기도 제목이나 마음 (옵션)</label>
-                    <textarea id="notes" name="notes" placeholder="자유롭게 적어주세요 (내부에 저장되지 않습니다)"></textarea>
-                </div>
+
+            <div class="field">
+                <label for="verseText">Verse Text (Optional)</label>
+                <textarea id="verseText" name="verseText" placeholder="Paste the verse text here (optional)"></textarea>
+                <div class="hint">If left empty, the service will look up the verse.</div>
             </div>
-            <div class="input-row">
-                <button type="submit">묵상 만들기</button>
-            </div>
+
+            <button type="submit" id="submit-btn" disabled>Create Meditation</button>
         </form>
     </section>
 
     <section class="card">
-        <h2>결과</h2>
-        <div id="result" class="result muted">묵상을 생성하면 이곳에 결과가 표시됩니다.</div>
+        <h2>Meditation</h2>
+        <div id="result" class="result-shell empty">
+            Enter a Bible verse reference to begin your meditation.
+        </div>
     </section>
 
-    <section class="card" style="grid-column: 1 / -1;">
-        <h2>최근 묵상</h2>
-        <ul id="history" class="history">
-            <li class="muted">아직 생성된 묵상이 없습니다.</li>
+    <section class="card history">
+        <h2>Recent Meditations</h2>
+        <ul id="history-list">
+            <li class="muted">No meditations yet.</li>
         </ul>
     </section>
 </main>
@@ -221,7 +237,15 @@
 <script>
     const form = document.getElementById('meditation-form');
     const resultBox = document.getElementById('result');
-    const historyList = document.getElementById('history');
+    const submitBtn = document.getElementById('submit-btn');
+    const historyList = document.getElementById('history-list');
+    const referenceInput = document.getElementById('reference');
+
+    function toggleSubmitState() {
+        submitBtn.disabled = !referenceInput.value.trim() || submitBtn.dataset.loading === 'true';
+    }
+
+    referenceInput.addEventListener('input', toggleSubmitState);
 
     async function fetchRecent() {
         try {
@@ -237,7 +261,7 @@
     function renderHistory(items) {
         historyList.innerHTML = '';
         if (!items || items.length === 0) {
-            historyList.innerHTML = '<li class="muted">최근 생성된 묵상이 없습니다.</li>';
+            historyList.innerHTML = '<li class="muted">No meditations yet.</li>';
             return;
         }
 
@@ -245,19 +269,37 @@
             const li = document.createElement('li');
             const time = new Date(item.createdAt).toLocaleString();
             li.innerHTML = `
-                <div class="timestamp">${time} · ${item.contextTag}</div>
-                <div><strong>${item.reference}</strong></div>
-                <div class="muted" style="margin-top: 6px;">${item.prayer}</div>
+                <div class="timestamp">${time}</div>
+                <div><strong>${item.reference}</strong> <span class="muted">${item.contextTag || 'General'}</span></div>
+                <div class="muted" style="margin-top: 6px; line-height: 1.5;">${item.prayer}</div>
             `;
             historyList.appendChild(li);
         }
     }
 
+    function renderResult(data) {
+        if (!data) {
+            resultBox.classList.add('empty');
+            resultBox.innerHTML = 'Enter a Bible verse reference to begin your meditation.';
+            return;
+        }
+
+        resultBox.classList.remove('empty');
+        resultBox.innerHTML = `
+            <div class="tag">${data.reference}${data.contextTag ? ' · ' + data.contextTag : ''}</div>
+            <h3>Reflection</h3>
+            <p>${data.reflection.replace(/\n/g, '<br>')}</p>
+            <h3>Prayer</h3>
+            <p>${data.prayer.replace(/\n/g, '<br>')}</p>
+        `;
+    }
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.textContent = '생성 중...';
+        submitBtn.dataset.loading = 'true';
+        toggleSubmitState();
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Creating...';
 
         const payload = {
             reference: form.reference.value.trim(),
@@ -274,25 +316,34 @@
 
             if (!res.ok) {
                 const err = await res.text();
-                resultBox.textContent = `오류가 발생했습니다: ${err}`;
-                resultBox.classList.remove('muted');
+                renderResult({
+                    reference: payload.reference,
+                    contextTag: payload.contextTag,
+                    reflection: 'An error occurred while creating the meditation.',
+                    prayer: err || 'Please try again in a moment.'
+                });
                 return;
             }
 
             const data = await res.json();
-            resultBox.textContent = `묵상 가이드\n\n${data.reflection}\n\n기도\n${data.prayer}`;
-            resultBox.classList.remove('muted');
+            renderResult(data);
             fetchRecent();
         } catch (e) {
-            resultBox.textContent = '서버와 통신하는 동안 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
-            resultBox.classList.remove('muted');
+            renderResult({
+                reference: payload.reference,
+                contextTag: payload.contextTag,
+                reflection: 'We could not reach the server.',
+                prayer: 'Please check your connection and try again.'
+            });
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = '묵상 만들기';
+            submitBtn.dataset.loading = 'false';
+            submitBtn.textContent = originalText;
+            toggleSubmitState();
         }
     });
 
     fetchRecent();
+    toggleSubmitState();
 </script>
 </body>
 </html>
